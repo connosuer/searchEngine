@@ -1,6 +1,9 @@
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse
 from settings import *
+import joblib
+from models.hybrid_relevance_model import HybridRelevanceModel
+import pandas as pd
 
 with open("blacklist.txt") as f: 
     bad_domains_list = set(f.read().split("\n"))
@@ -24,7 +27,8 @@ def tracker_urls(row):
 
 class Filter(): 
     def __init__(self, results): 
-        self.filtered = results.copy()
+        self.results = results
+        self.model = joblib.load('hybrid_relevance_model.joblib')
 
     def content_filter(self): 
         page_content = self.filtered.apply(get_page_content, axis = 1)
@@ -43,8 +47,6 @@ class Filter():
 
 
     def filter(self): 
-        self.content_filter()
-        self.tracker_filter()
-        self.filtered = self.filtered.sort_values("rank", ascending = True)
-        self.filtered["rank"] = self.filtered["rank"].round()
-        return self.filtered
+        query = self.results['query'].iloc[0]
+        ranked_results = self.model.rank_results(query, self.results.to_dict('records'))
+        return pd.DataFrame(ranked_results)

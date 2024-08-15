@@ -1,4 +1,12 @@
 flask
-pandas
 requests
 beautifulsoup4
+pandas
+numpy
+scikit-learn
+gensim
+transformers
+torch
+nltk
+schedule
+joblib

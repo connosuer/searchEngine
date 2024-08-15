@@ -79,13 +79,11 @@ from flask import Flask, request, jsonify, abort
 
 @app.route("/relevant", methods=["POST"])
 def mark_relevant():
-    if not request.is_json:
-        abort(415)  # Unsupported Media Type
     data = request.get_json()
-    if not data or 'query' not in data or 'link' not in data:
-        abort(400)  # Bad Request
     query = data["query"]
     link = data["link"]
+    relevance_score = data.get("relevance", 1)  # Default to 1 if not provided
+    
     storage = DBStorage()
-    storage.update_relevance(query, link, 10)
+    storage.mark_relevant(query, link, relevance_score)
     return jsonify(success=True)

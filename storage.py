@@ -52,3 +52,25 @@ class DBStorage():
             print(f"An error occurred: {e}")
         finally:
             cur.close()
+
+    def mark_relevant(self, query, link, relevance_score):
+        cur = self.con.cursor()
+        try:
+            cur.execute('''
+                UPDATE results 
+                SET relevance = ?
+                WHERE query = ? AND link = ?
+            ''', (relevance_score, query, link))
+            self.con.commit()
+        except sqlite3.Error as e:
+            print(f"An error occurred: {e}")
+        finally:
+            cur.close()
+
+    def get_relevance_data(self):
+        query = '''
+            SELECT query, link, title, snippet, relevance
+            FROM results
+            WHERE relevance IS NOT NULL
+        '''
+        return pd.read_sql(query, self.con)
