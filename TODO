@@ -1,0 +1,4 @@
+mark relevant result in search and store in database
+get enough training data for machine learning
+
+building filters that query data from the database, train a model, and filter based on that model
