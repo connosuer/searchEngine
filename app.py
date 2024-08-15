@@ -3,6 +3,8 @@ from search import search
 import html
 from filter import Filter 
 from storage import DBStorage
+import csv
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -24,17 +26,19 @@ color: green;
     color: blue; 
     }
 </style>
+
 <script>
-const relevant = function(query, link){
+const relevant = function(query, link, relevance){
     fetch("/relevant", {
         method: 'POST',
         headers: {
             'Accept': 'application/json',
-            'Content-Type': 'application/json'  // Add this line
+            'Content-Type': 'application/json'
         },
         body: JSON.stringify({
             "query": query,
-            "link": link
+            "link": link,
+            "relevance": relevance
         })
     });
 }
@@ -49,8 +53,16 @@ search_template = styles + """
 """
 
 result_template = """
-<p class = "site">{rank}: {link} <span class = "rel-button" onclick ='relevant("{query}","{link}"); '>Relevant</span></p>
-<a href="{link}">{snippet}</p>
+<p class="site">{rank}: {link} 
+    <select onchange='relevant("{query}", "{link}", this.value)'>
+        <option value="">Rate relevance</option>
+        <option value="0">Not relevant</option>
+        <option value="1">Somewhat relevant</option>
+        <option value="2">Relevant</option>
+        <option value="3">Highly relevant</option>
+    </select>
+</p>
+<a href="{link}">{snippet}</a>
 """
 
 def show_search_form(): 
@@ -86,4 +98,10 @@ def mark_relevant():
     
     storage = DBStorage()
     storage.mark_relevant(query, link, relevance_score)
+
+    #log the feedback
+    with open('feedback_log.csv', 'a', newline='', encoding='utf-8') as file:
+        writer = csv.writer(file)
+        writer.writerow([datetime.utcnow(), query, link, relevance_score])
+
     return jsonify(success=True)

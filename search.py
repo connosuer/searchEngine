@@ -5,6 +5,7 @@ import pandas as pd
 from storage import DBStorage
 from urllib.parse import quote_plus
 from datetime import datetime
+import csv
 
 def search_api(query, pages = int(RESULT_COUNT/10)): 
     results = []
@@ -56,4 +57,13 @@ def search(query):
     results = results[columns]
     results.apply(lambda x: storage.insert_row(x), axis=1)
 
+    log_search(query, results)
+
     return results
+
+def log_search(query, results):
+    with open('search_log.csv', 'a', newline='', encoding='utf-8') as file:
+        writer = csv.writer(file)
+        for _, row in results.iterrows():
+            writer.writerow([datetime.utcnow(), query, row['link'], row['snippet'], row['rank']])
+
