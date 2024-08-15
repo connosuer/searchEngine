@@ -1,3 +1,5 @@
-settings.py
 links.db
 searchEngine.yaml
+__pycache__
+blacklist.txt
+TODO
